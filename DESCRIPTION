@@ -1,0 +1,21 @@
+Package: hydroutils
+Type: Package
+Title: Utilities to work with hydrological data
+Version: 0.0.1
+Author: Gabriel Gaona
+Maintainer: Gabriel Gaona <gavg712@gmail.com>
+Description: Useful functions to work with hydrological data. 
+    The functions were created to suply the necesities found around forums, 
+    blogs, social media, etc. There are a lot of simple functions to reproduce 
+    the hydrological data science.
+License: License Creative Commons 4.
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    lubridate,
+    ggplot2,
+    rlang,
+    scales,
+    RcppRoll
+RoxygenNote: 7.0.2

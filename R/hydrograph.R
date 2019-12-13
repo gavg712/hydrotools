@@ -1,0 +1,104 @@
+# hydrograph plus hyetograph
+#'
+#' @description The function to plot a hyetograph over a hydrograph based on ggplot functions.
+#' @name hydrograph
+#' @title Hydrograph plus Hyetograph
+#' @param data tbl or Data frame object.
+#' @param time Vector name of timestamp variable in `data`.
+#' @param runoff Vector name of Runoff variable in `data`.
+#' @param rain Vector name of Rainfall variable in `data`.
+#' @param agg.time_unit Integrer. Default "3 hours". Time lag unit to aggregate
+#'     rainfall bars by sum function. This will be showed as light blue line of
+#'     hyetrograph.
+#' @param agg.window Integrer. Default 8. Value of number o values from rainfall
+#'     data to aggregate by rolling mean function. This will be showed as dark
+#'     blue line of hyetrograph.
+#' @param vsep numeric. Default 0.5. Value between 0 and 1 to scale the vertical
+#'     separation of hyetograph from hydrograph. 1 means 100% of difference
+#'     between min and max runoff.
+#' @keywords hydrograph, rainfall-runoff plot, plot
+#' @author Gabriel Gaona
+#' @import dplyr ggplot2 rlang RcppRoll scales magrittr
+#' @details ggplot2 object is generated
+#' @export
+#' @examples
+#' # ploting soil moisture
+#' data("zhurucay")
+#' #
+#' hydrograph(data = zhurucay,
+#'     time = Fecha,
+#'     runoff = `Caudal (m3/s)`,
+#'     rain = `Lluvia (mm)`,
+#'     agg.time_unit = "month",
+#'     agg.window = 6
+#' )
+#' @note Based on the request at \url(https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot)
+
+hydrograph <- function(data,
+                       time = time,
+                       runoff = Runoff,
+                       rain = Rain,
+                       agg.time_unit = "3 hours",
+                       agg.window = 8,
+                       vsep = 0.5) {
+
+  lim <- max(dplyr::pull(data, {{ runoff }}), na.rm = TRUE) +
+    {range(
+      dplyr::pull(data, {{ runoff }}), na.rm = TRUE) %>%
+       diff()} * vsep
+
+  rain_data <- data %>%
+    dplyr::group_by({{ time }} := lubridate::floor_date({{ time }},
+                                                        unit = agg.time_unit)) %>%
+    dplyr::summarise({{ rain }} := sum({{ rain }}, na.rm = TRUE)) %>%
+    dplyr::mutate(rain_scl = scales::rescale({{ rain }},
+                                      to = c(lim,
+                                             min(
+                                               dplyr::pull(data,
+                                                           {{ runoff }}),
+                                                 na.rm = TRUE))))
+
+  # base plot object
+  gg <- ggplot2::ggplot(data = rain_data, aes(x = {{ time }}))
+
+  # layers for hyetograph
+  gg <- gg +
+    ggplot2::geom_linerange(mapping =
+                              ggplot2::aes(ymin = rain_scl, ymax = lim,
+                                          color = "Rainfall"),
+                            alpha = 0.5) +
+    ggplot2::geom_line(aes(y = RcppRoll::roll_mean(rain_scl, n = agg.window,
+                                align = "center", fill = lim),
+                  color = paste0("Running mean Rainfall [", agg.time_unit, "]")))
+
+  # layers for hydrogrpah
+  gg <- gg +
+    ggplot2::geom_line(data = data, mapping = aes(y = {{ runoff }}, color = "Runoff"))
+
+  # Adding a second axis
+  gg <- gg +
+    ggplot2::scale_y_continuous(expression(
+      paste("Runoff [m"^3, "/s]")),
+      sec.axis = ggplot2::sec_axis(
+        trans = ~scales::rescale(.,
+                                 to = base::rev(
+                                   base::range(
+                                     dplyr::pull(rain_data,
+                                                 {{ rain }}))),
+                                 from = c(0, lim)),
+        name = paste0("Rainfall [mm/", agg.time_unit, "]")))
+  gg <- gg +
+    ggplot2::scale_color_manual(
+      values = magrittr::set_names(
+        c("#3f88c5","#19364e", "#f97171"),
+        c("Rainfall", paste0("Running mean Rainfall [", agg.time_unit, "]"),
+          "Runoff"))
+      )
+
+  # theming
+  gg <- gg +
+    ggplot2::theme_bw() +
+    ggplot2::theme(legend.position = "bottom", legend.title = element_blank())
+
+  gg
+}
