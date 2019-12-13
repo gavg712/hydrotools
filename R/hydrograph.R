@@ -95,10 +95,8 @@ hydrograph <- function(data,
           "Runoff"))
       )
 
-  # theming
   gg <- gg +
-    ggplot2::theme_bw() +
-    ggplot2::theme(legend.position = "bottom", legend.title = element_blank())
+    guides(color = guide_legend(title = ""))
 
   gg
 }
