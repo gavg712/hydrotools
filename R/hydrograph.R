@@ -30,8 +30,9 @@
 #'     runoff = runoff,
 #'     rain = rain,
 #'     agg.time_unit = "day",
-#'     agg.window = 7
-#' )
+#'     agg.window = 7) +
+#'     ggplot2::theme_light()+
+#'     ggplot2::theme(legend.position = "bottom")
 #' @note Based on the request at \url{https://stackoverflow.com/q/42057832}
 
 hydrograph <- function(data,

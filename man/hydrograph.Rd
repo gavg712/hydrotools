@@ -53,8 +53,9 @@ hydrograph(data = soil_moisture,
     runoff = runoff,
     rain = rain,
     agg.time_unit = "day",
-    agg.window = 7
-)
+    agg.window = 7) +
+    ggplot2::theme_light()+
+    ggplot2::theme(legend.position = "bottom")
 }
 \author{
 Gabriel Gaona
