@@ -46,9 +46,10 @@ hydrograph <- function(data,
                        vsep = 0.5) {
 
   lim <- max(dplyr::pull(data, {{ runoff }}), na.rm = TRUE) +
-    {range(
-      dplyr::pull(data, {{ runoff }}), na.rm = TRUE) %>%
-       diff()} * vsep
+    {
+      range(dplyr::pull(data, {{ runoff }}), na.rm = TRUE) %>%
+        diff()
+    } * vsep
 
   rain_data <- data %>%
     dplyr::group_by({{ time }} := lubridate::floor_date({{ time }},
@@ -56,9 +57,7 @@ hydrograph <- function(data,
     dplyr::summarise({{ rain }} := sum({{ rain }}, na.rm = TRUE)) %>%
     dplyr::mutate(rain_scl = scales::rescale({{ rain }},
                                       to = c(lim,
-                                             min(
-                                               dplyr::pull(data,
-                                                           {{ runoff }}),
+                                             min(dplyr::pull(data, {{ runoff }}),
                                                  na.rm = TRUE))))
 
   # base plot object
@@ -84,12 +83,10 @@ hydrograph <- function(data,
     ggplot2::scale_y_continuous(expression(
       paste("Runoff [m"^3, "/s]")),
       sec.axis = ggplot2::sec_axis(
-        trans = ~scales::rescale(.,
-                                 to = base::rev(
-                                   base::range(
-                                     dplyr::pull(rain_data,
-                                                 {{ rain }}))),
-                                 from = c(0, lim)),
+        trans = ~scales::rescale(., to = base::rev(
+          base::range( dplyr::pull(rain_data, {{ rain }}), na.rm = TRUE)),
+          from = c(min(dplyr::pull(data, {{ runoff }}), na.rm = TRUE), lim)
+        ),
         name = paste0("Rainfall [mm/", agg.time_unit, "]")))
   gg <- gg +
     ggplot2::scale_color_manual(
