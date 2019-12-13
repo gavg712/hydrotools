@@ -18,21 +18,21 @@
 #'     between min and max runoff.
 #' @keywords hydrograph, rainfall-runoff plot, plot
 #' @author Gabriel Gaona
-#' @import dplyr ggplot2 rlang RcppRoll scales magrittr
+#' @import dplyr ggplot2 rlang RcppRoll scales
 #' @details ggplot2 object is generated
 #' @export
 #' @examples
 #' # ploting soil moisture
-#' data("zhurucay")
+#' data("soil_moisture")
 #' #
-#' hydrograph(data = zhurucay,
-#'     time = Fecha,
-#'     runoff = `Caudal (m3/s)`,
-#'     rain = `Lluvia (mm)`,
-#'     agg.time_unit = "month",
-#'     agg.window = 6
+#' hydrograph(data = soil_moisture,
+#'     time = timestamp,
+#'     runoff = runoff,
+#'     rain = rain,
+#'     agg.time_unit = "day",
+#'     agg.window = 7
 #' )
-#' @note Based on the request at \url{https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot}
+#' @note Based on the request at \url{https://stackoverflow.com/q/42057832}
 
 hydrograph <- function(data,
                        time = time,
@@ -89,7 +89,7 @@ hydrograph <- function(data,
         name = paste0("Rainfall [mm/", agg.time_unit, "]")))
   gg <- gg +
     ggplot2::scale_color_manual(
-      values = magrittr::set_names(
+      values = rlang::set_names(
         c("#3f88c5","#19364e", "#f97171"),
         c("Rainfall", paste0("Running mean Rainfall [", agg.time_unit, "]"),
           "Runoff"))
