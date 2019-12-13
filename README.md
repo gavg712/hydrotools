@@ -9,5 +9,5 @@ functions.
 
 ```
 # install.packages(devtools)
-devtools::install_git('gavg712/hydroutils.git')
+devtools::install_gitlab('gavg712/hydroutils.git')
 ```
