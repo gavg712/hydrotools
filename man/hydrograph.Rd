@@ -42,18 +42,18 @@ The function to plot a hyetograph over a hydrograph based on ggplot functions.
 ggplot2 object is generated
 }
 \note{
-Based on the request at \url{https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot}
+Based on the request at \url{https://stackoverflow.com/q/42057832}
 }
 \examples{
 # ploting soil moisture
-data("zhurucay")
+data("soil_moisture")
 #
-hydrograph(data = zhurucay,
-    time = Fecha,
-    runoff = `Caudal (m3/s)`,
-    rain = `Lluvia (mm)`,
-    agg.time_unit = "month",
-    agg.window = 6
+hydrograph(data = soil_moisture,
+    time = timestamp,
+    runoff = runoff,
+    rain = rain,
+    agg.time_unit = "day",
+    agg.window = 7
 )
 }
 \author{
