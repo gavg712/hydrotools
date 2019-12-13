@@ -66,9 +66,10 @@ hydrograph <- function(data,
 
   # layers for hyetograph
   gg <- gg +
-    ggplot2::geom_linerange(mapping =
-                              ggplot2::aes(ymin = rain_scl, ymax = lim,
-                                          color = "Rainfall"),
+    ggplot2::geom_segment(mapping =
+                              ggplot2::aes(xend = {{ time }},
+                                           y = rain_scl, yend = lim,
+                                           color = "Rainfall"),
                             alpha = 0.5) +
     ggplot2::geom_line(aes(y = RcppRoll::roll_mean(rain_scl, n = agg.window,
                                 align = "center", fill = lim),
