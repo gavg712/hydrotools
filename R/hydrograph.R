@@ -19,7 +19,9 @@
 #' @keywords hydrograph, rainfall-runoff plot, plot
 #' @author Gabriel Gaona
 #' @import dplyr ggplot2 rlang RcppRoll scales
-#' @details ggplot2 object is generated
+#' @details ggplot2 object is generated. Other functions passed to \code{theme()}
+#'     guides() or labs() can be used to customize the hydrograph.
+#'
 #' @export
 #' @examples
 #' # ploting soil moisture

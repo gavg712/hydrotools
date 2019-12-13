@@ -39,7 +39,8 @@ between min and max runoff.}
 The function to plot a hyetograph over a hydrograph based on ggplot functions.
 }
 \details{
-ggplot2 object is generated
+ggplot2 object is generated. Other functions passed to \code{theme()}
+    guides() or labs() can be used to customize the hydrograph.
 }
 \note{
 Based on the request at \url{https://stackoverflow.com/q/42057832}
