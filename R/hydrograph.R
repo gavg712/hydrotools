@@ -32,7 +32,7 @@
 #'     agg.time_unit = "month",
 #'     agg.window = 6
 #' )
-#' @note Based on the request at \url(https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot)
+#' @note Based on the request at \url{https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot}
 
 hydrograph <- function(data,
                        time = time,
