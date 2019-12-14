@@ -16,6 +16,32 @@ devtools::install_gitlab('gavg712/hydroutils.git')
 # from GitHub (alternative repository)
 devtools::install_github('gavg712/hydroutils.git')
 ```
+## Examples
+
+The function `hydrograph` will returna ggplot object. That can be manipulated
+following the logic of `ggplot2` package:
+
+``` r
+library(hydroutils)
+library(ggplot2)
+
+# load data
+data("soil_moisture")
+
+soil_moisture %>%
+  hydrograph(
+    time = timestamp,
+    runoff = runoff,
+    rain = rain,
+    agg.time_unit = "3 hour",
+    agg.window = 12
+  ) +
+  labs(x = "Timestamp", title = "Hydrograph", 
+       subtitle = "Included running mean rainfall") +
+  theme(legend.position = "bottom")
+```
+
+![](man/figures/example_01.png)
 
 ## Troubleshooting
 
