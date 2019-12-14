@@ -2,13 +2,16 @@ Package: hydroutils
 Type: Package
 Title: Utilities to work with hydrological data
 Version: 0.0.1
-Author: Gabriel Gaona
-Maintainer: Gabriel Gaona <gavg712@gmail.com>
+Author: Gabriel V. Gaona [aut, cre, cph]
+Authors@R: c(person("Gabriel V. Gaona", email = "gavg712@gmail.com", role=c("aut", "cre", "cph") ) )
+Maintainer: Gabriel V. Gaona <gavg712@gmail.com>
 Description: Useful functions to work with hydrological data. 
     The functions were created to suply the necesities found around forums, 
     blogs, social media, etc. There are a lot of simple functions to reproduce 
     the hydrological data science.
-License: GPL-3
+License: GPL (>=3)
+URL: https://gitlab.com/gavg712/hydroutils
+BugReports: https://gitlab.com/gavg712/hydroutils/issues
 Encoding: UTF-8
 LazyData: true
 Imports:
