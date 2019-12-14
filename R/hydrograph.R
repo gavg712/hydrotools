@@ -45,35 +45,35 @@ hydrograph <- function(data,
                        agg.window = 8,
                        vsep = 0.5) {
 
-  lim <- max(dplyr::pull(data, {{ runoff }}), na.rm = TRUE) +
-    {
-      range(dplyr::pull(data, {{ runoff }}), na.rm = TRUE) %>%
-        diff()
-    } * vsep
+  rng_rnf <- range(dplyr::pull(data, {{ runoff }}), na.rm = TRUE)
+
+  lim <- max(rng_rnf) + diff(rng_rnf) * vsep
 
   rain_data <- data %>%
     dplyr::group_by({{ time }} := lubridate::floor_date({{ time }},
                                                         unit = agg.time_unit)) %>%
     dplyr::summarise({{ rain }} := sum({{ rain }}, na.rm = TRUE)) %>%
     dplyr::mutate(rain_scl = scales::rescale({{ rain }},
-                                      to = c(lim,
-                                             min(dplyr::pull(data, {{ runoff }}),
-                                                 na.rm = TRUE))))
+                                             to = c(lim, min(rng_rnf)))) %>%
+    dplyr::mutate(rain_rm = RcppRoll::roll_mean(rain_scl, n = agg.window,
+                                                align = "center", fill = lim,
+                                                na.rm = TRUE))
+
 
   # base plot object
   gg <- ggplot2::ggplot(data = rain_data, aes(x = {{ time }}))
 
   # layers for hyetograph
   gg <- gg +
-    ggplot2::geom_segment(mapping =
-                              ggplot2::aes(xend = {{ time }},
-                                           y = rain_scl, yend = lim,
-                                           color = "Rainfall"),
-                            alpha = 0.5) +
-    ggplot2::geom_line(aes(y = RcppRoll::roll_mean(rain_scl, n = agg.window,
-                                align = "center", fill = lim),
-                  color = paste0("Running mean Rainfall [", agg.time_unit, "]")))
-
+    ggplot2::geom_segment(
+      mapping = ggplot2::aes(xend = {{ time }}, y = rain_scl,
+                             yend = lim, color = "Rainfall"),
+      alpha = 0.5) +
+    ggplot2::geom_line(
+      mapping = aes(y = rain_rm,
+                    color = paste0("Running mean rainfall [", agg.time_unit, "]")
+      )
+    )
   # layers for hydrogrpah
   gg <- gg +
     ggplot2::geom_line(data = data, mapping = aes(y = {{ runoff }}, color = "Runoff"))
