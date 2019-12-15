@@ -1,0 +1,154 @@
+#' Rainfall charts
+#'
+#' The Hydrological Data Science require especial plots to usderstand the
+#' ecological relations of hydrological fenomenum. `geom_rainfall()` and
+#' `geom_runoff()` allows to compare the timeseries of Rain and Runoff of a
+#' ecosystem.
+#' `geom_rainfall()` makes the inverse height of the bar proportional to the
+#' range of `runoff` aesthetic supplied.
+#'
+#' If you want the
+#' heights of the bars to represent values in the data, use
+#' `geom_col()` instead. `geom_bar()` uses `stat_count()` by
+#' default: it counts the number of cases at each x position. `geom_col()`
+#' uses `stat_identity()`: it leaves the data as is.
+#'
+#' A bar chart uses height to represent a value, and so the base of the
+#' bar must always be shown to produce a valid visual comparison. This is why
+#' it doesn't make sense to use a log-scaled y axis with a bar chart.
+#'
+#' By default, multiple bars occupying the same `x` position will be stacked
+#' atop one another by [position_stack()]. If you want them to be dodged
+#' side-to-side, use [position_dodge()] or [position_dodge2()]. Finally,
+#' [position_fill()] shows relative proportions at each `x` by stacking the bars
+#' and then standardising each bar to have the same height.
+#'
+#' @eval rd_orientation()
+#'
+#' @eval rd_aesthetics("geom", "bar")
+#' @eval rd_aesthetics("geom", "col")
+#' @eval rd_aesthetics("stat", "count")
+#' @seealso
+#'   [geom_histogram()] for continuous data,
+#'   [position_dodge()] and [position_dodge2()] for creating side-by-side
+#'   bar charts.
+#' @export
+#' @inheritParams layer
+#' @inheritParams geom_point
+#' @param orientation The orientation of the layer. The default (`NA`)
+#' automatically determines the orientation from the aesthetic mapping. In the
+#' rare event that this fails it can be given explicitly by setting `orientation`
+#' to either `"x"` or `"y"`. See the *Orientation* section for more detail.
+#' @param width Bar width. By default, set to 90% of the resolution of the data.
+#' @param binwidth `geom_bar()` no longer has a binwidth argument - if
+#'   you use it you'll get an warning telling to you use
+#'   [geom_histogram()] instead.
+#' @param geom,stat Override the default connection between `geom_bar()` and
+#'   `stat_count()`.
+#' @examples
+#' # geom_bar is designed to make it easy to create bar charts that show
+#' # counts (or sums of weights)
+#' g <- ggplot(mpg, aes(class))
+#' # Number of cars in each class:
+#' g + geom_bar()
+#' # Total engine displacement of each class
+#' g + geom_bar(aes(weight = displ))
+#' # Map class to y instead to flip the orientation
+#' ggplot(mpg) + geom_bar(aes(y = class))
+#'
+#' # Bar charts are automatically stacked when multiple bars are placed
+#' # at the same location. The order of the fill is designed to match
+#' # the legend
+#' g + geom_bar(aes(fill = drv))
+#'
+#' # If you need to flip the order (because you've flipped the orientation)
+#' # call position_stack() explicitly:
+#' ggplot(mpg, aes(y = class)) +
+#'  geom_bar(aes(fill = drv), position = position_stack(reverse = TRUE)) +
+#'  theme(legend.position = "top")
+#'
+#' # To show (e.g.) means, you need geom_col()
+#' df <- data.frame(trt = c("a", "b", "c"), outcome = c(2.3, 1.9, 3.2))
+#' ggplot(df, aes(trt, outcome)) +
+#'   geom_col()
+#' # But geom_point() displays exactly the same information and doesn't
+#' # require the y-axis to touch zero.
+#' ggplot(df, aes(trt, outcome)) +
+#'   geom_point()
+#'
+#' # You can also use geom_bar() with continuous data, in which case
+#' # it will show counts at unique locations
+#' df <- data.frame(x = rep(c(2.9, 3.1, 4.5), c(5, 10, 4)))
+#' ggplot(df, aes(x)) + geom_bar()
+#' # cf. a histogram of the same data
+#' ggplot(df, aes(x)) + geom_histogram(binwidth = 0.5)
+
+geom_rainfall <- function(mapping = NULL, data = NULL,
+                          stat = "rain", position = "identity",
+                          ...,
+                          runoff.range = range(runoff, na.rm = TRUE),
+                          width = NULL,
+                          binwidth = NULL,
+                          na.rm = FALSE,
+                          show.legend = NA,
+                          inherit.aes = TRUE) {
+
+
+  ggplot2::layer(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomRainfall,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      width = width,
+      na.rm = na.rm,
+      orientation = orientation,
+      ...
+    )
+  )
+}
+
+#' @rdname ggplot2-ggproto
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomRainfall <- ggplot2::ggproto(
+  "GeomRainfall",
+  ggplot2::Geom,
+  required_aes = c("x", "y"),
+  default_aes = aes(weight = 1, fill = "#3f88c5",
+                    alpha = 0.5),
+
+  # These aes columns are created by setup_data(). They need to be listed here so
+  # that GeomRect$handle_na() properly removes any bars that fall outside the defined
+  # limits, not just those for which x and y are outside the limits
+  non_missing_aes = c("xmin", "xmax", "ymin", "ymax"),
+
+  setup_params = function(data, params) {
+    params$flipped_aes <- has_flipped_aes(data, params,
+                                          range_is_orthogonal = FALSE)
+    params
+  },
+
+  extra_params = c("na.rm", "orientation"),
+
+  setup_data = function(data, params) {
+    data$flipped_aes <- params$flipped_aes
+    data <- flip_data(data, params$flipped_aes)
+    data$width <- data$width %||%
+      params$width %||% (resolution(data$x, FALSE) * 0.9)
+    data <- transform(data,
+                      ymin = pmin(y, 0), ymax = pmax(y, 0),
+                      xmin = x - width / 2, xmax = x + width / 2, width = NULL
+    )
+    flip_data(data, params$flipped_aes)
+  },
+
+  draw_panel = function(self, data, panel_params, coord, width = NULL, flipped_aes = FALSE) {
+    # Hack to ensure that width is detected as a parameter
+    ggproto_parent(GeomRect, self)$draw_panel(data, panel_params, coord)
+  }
+)
