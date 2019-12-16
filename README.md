@@ -11,10 +11,10 @@ functions.
 # install.packages(devtools)
 
 # from GitLab (main repository)
-devtools::install_gitlab('gavg712/hydroutils.git')
+devtools::install_gitlab('gavg712/hydroutils')
 
 # from GitHub (alternative repository)
-devtools::install_github('gavg712/hydroutils.git')
+devtools::install_github('gavg712/hydroutils')
 ```
 ## Examples
 
