@@ -118,14 +118,17 @@ geom_rainfall <- function(mapping = NULL, data = NULL,
 GeomRainfall <- ggplot2::ggproto(
   "GeomRainfall",
   ggplot2::Geom,
-  required_aes = c("x", "y"),
-  default_aes = aes(weight = 1, fill = "#3f88c5",
+  required_aes = c("x", "rain", "runoff"),
+  default_aes = aes(agg.time.unit = "day",
+                    agg.window = NULL,
+                    color = "#3f88c5",
+                    ysep = 0.5,
                     alpha = 0.5),
 
   # These aes columns are created by setup_data(). They need to be listed here so
   # that GeomRect$handle_na() properly removes any bars that fall outside the defined
   # limits, not just those for which x and y are outside the limits
-  non_missing_aes = c("xmin", "xmax", "ymin", "ymax"),
+  non_missing_aes = c("xend", "yend"),
 
   setup_params = function(data, params) {
     params$flipped_aes <- has_flipped_aes(data, params,
