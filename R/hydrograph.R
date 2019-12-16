@@ -92,7 +92,7 @@ hydrograph <- function(data,
     ggplot2::scale_color_manual(
       values = rlang::set_names(
         c("#3f88c5","#19364e", "#f97171"),
-        c("Rainfall", paste0("Running mean Rainfall [", agg.time_unit, "]"),
+        c("Rainfall", paste0("Running mean rainfall [", agg.time_unit, "]"),
           "Runoff"))
       )
 
