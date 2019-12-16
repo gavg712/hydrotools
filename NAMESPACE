@@ -2,9 +2,13 @@
 
 export("%>%")
 export(hydrograph)
+export(rnf_unit_convert)
 import(RcppRoll)
 import(dplyr)
 import(ggplot2)
 import(rlang)
 import(scales)
 importFrom(magrittr,"%>%")
+importFrom(readr,parse_number)
+importFrom(stringr,str_detect)
+importFrom(stringr,str_extract)
